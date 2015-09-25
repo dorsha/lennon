@@ -24,7 +24,7 @@ var (
 	action    = flag.String("action", "", "What do you want to do? Avialble actions: "+index+","+search)
 	pathToDoc = flag.String("document", "", "Path to document that you want to index")
 	query     = flag.String("query", "", "Search query")
-	url       = flag.String("url", "", "Search engine URL (i.e. http://192.168.1.26:9200")
+	url       = flag.String("url", "", "Search engine URL (i.e. http://192.168.1.26:9200)")
 )
 
 func main() {
