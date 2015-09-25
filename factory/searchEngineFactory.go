@@ -18,6 +18,7 @@ const (
 type SearchEngine interface {
 	Index(document []byte) error
 	Search(query string) (interface{}, error)
+	Delete() error
 }
 
 type ElasticEngine struct {
@@ -59,7 +60,12 @@ func (es *ElasticEngine) Search(query string) (interface{}, error) {
 	return searchResult, err
 }
 
-func (es *BleveEngine) Index(document []byte) error {
+func (es *ElasticEngine) Delete() error {
+	_, err := es.client.DeleteIndex(INDEX).Do()
+	return err
+}
+
+func (be *BleveEngine) Index(document []byte) error {
 	var index bleve.Index
 	index, err := bleve.Open(INDEX)
 	if index == nil {
@@ -74,7 +80,7 @@ func (es *BleveEngine) Index(document []byte) error {
 	return nil
 }
 
-func (es *BleveEngine) Search(query string) (interface{}, error) {
+func (be *BleveEngine) Search(query string) (interface{}, error) {
 	index, _ := bleve.Open(INDEX)
 	bleveQuery := bleve.NewQueryStringQuery(query)
 	searchRequest := bleve.NewSearchRequest(bleveQuery)
@@ -83,6 +89,11 @@ func (es *BleveEngine) Search(query string) (interface{}, error) {
 		return nil, err
 	}
 	return searchResults, nil
+}
+
+func (be *BleveEngine) Delete() error {
+	index, _ := bleve.Open(INDEX)
+	return index.Delete(INDEX)
 }
 
 func GetSearchEngine(url *string, vendor *string) (SearchEngine, error) {

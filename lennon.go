@@ -15,14 +15,15 @@ import (
 )
 
 const (
-	index  = "index"
-	search = "search"
+	index       = "index"
+	search      = "search"
+	deleteIndex = "deleteIndex"
 )
 
 var (
 	vendor = flag.String("vendor", "elastic", "Specify the vendor you want to test ("+factory.VENDOR_ELASTIC+"/"+
 		factory.VENDOR_BLEVE+")")
-	action    = flag.String("action", "", "What do you want to do? Avialble actions: "+index+","+search)
+	action    = flag.String("action", "", "What do you want to do? Avialble actions: "+index+", "+search+", "+deleteIndex)
 	pathToDoc = flag.String("document", "", "Path to document that you want to index")
 	query     = flag.String("query", "", "Search query")
 	url       = flag.String("url", "", "ElasticSearch URL (i.e. http://192.168.1.26:9200) - not relvant for Bleve")
@@ -47,8 +48,10 @@ func main() {
 		doIndex()
 	case search:
 		doSearch()
+	case deleteIndex:
+		doDelete()
 	default:
-		fmt.Fprintf(os.Stderr, "error: %v\n", "Action must be one of %s or %s.", index, search)
+		fmt.Fprintf(os.Stderr, "error: %v\n", "Invalid action")
 		os.Exit(1)
 	}
 }
@@ -68,6 +71,13 @@ func doIndex() {
 	err = engine.Index(doc)
 	utils.ErrorCheck(err)
 	fmt.Printf("Took %d milliseconds to index.\n", time.Now().UnixNano()/int64(time.Millisecond)-start)
+}
+
+func doDelete() {
+	engine := getSearchEngine()
+	err := engine.Delete()
+	utils.ErrorCheck(err)
+	fmt.Printf("Index deleted\n")
 }
 
 func doSearch() {
