@@ -2,31 +2,17 @@ package factory
 
 import (
 	"errors"
-	"github.com/blevesearch/bleve"
 	"gopkg.in/olivere/elastic.v2"
 	"log"
 	"os"
 	"time"
 )
 
-const (
-	INDEX          = "doc.test"
-	VENDOR_ELASTIC = "elastic"
-	VENDOR_BLEVE   = "bleve"
-)
-
-type SearchEngine interface {
-	Index(document []byte) error
-	Search(query string) (interface{}, error)
-	Delete() error
-}
-
 type ElasticEngine struct {
 	client *elastic.Client
 }
 
-type BleveEngine struct {
-}
+/* Implements the SearchEngine interface */
 
 func (es *ElasticEngine) Index(document []byte) error {
 	// create index if not exists
@@ -39,7 +25,7 @@ func (es *ElasticEngine) Index(document []byte) error {
 	}
 
 	// Index the data
-	_, err = es.client.Index().Index(INDEX).Type("person").Id("1").BodyJson(string(document[:])).Do()
+	_, err = es.client.Index().Index(INDEX).Type(INDEX).Id(INDEX).BodyJson(string(document[:])).Do()
 	if err != nil {
 		return err
 	}
@@ -54,7 +40,6 @@ func (es *ElasticEngine) Search(query string) (interface{}, error) {
 		Query(&termQuery).
 		From(0).Size(10).
 		Pretty(true).
-		Sort("age", true).
 		Do()
 
 	return searchResult, err
@@ -63,37 +48,6 @@ func (es *ElasticEngine) Search(query string) (interface{}, error) {
 func (es *ElasticEngine) Delete() error {
 	_, err := es.client.DeleteIndex(INDEX).Do()
 	return err
-}
-
-func (be *BleveEngine) Index(document []byte) error {
-	var index bleve.Index
-	index, err := bleve.Open(INDEX)
-	if index == nil {
-		mapping := bleve.NewIndexMapping()
-		index, err = bleve.New(INDEX, mapping)
-		if err != nil {
-			return err
-		}
-	}
-
-	index.Index("data", document)
-	return nil
-}
-
-func (be *BleveEngine) Search(query string) (interface{}, error) {
-	index, _ := bleve.Open(INDEX)
-	bleveQuery := bleve.NewQueryStringQuery(query)
-	searchRequest := bleve.NewSearchRequest(bleveQuery)
-	searchResults, err := index.Search(searchRequest)
-	if err != nil {
-		return nil, err
-	}
-	return searchResults, nil
-}
-
-func (be *BleveEngine) Delete() error {
-	index, _ := bleve.Open(INDEX)
-	return index.Delete(INDEX)
 }
 
 func GetSearchEngine(url *string, vendor *string) (SearchEngine, error) {
