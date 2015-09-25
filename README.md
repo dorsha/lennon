@@ -1,6 +1,10 @@
 # lennon
 Go utility for ElasticSearch and Bleve
 
+##Status
+- [x] ElasticSearch support
+- [x] Bleve support
+
 ## Prerequisite
 * ElasticSearch installed and running - *not relevant when using Bleve*
 
@@ -30,7 +34,3 @@ Go utility for ElasticSearch and Bleve
 
 **Search for a person (Bleve)**  
 ```go run lennon.go -vendor bleve -action search -query john ```
-
-##Status
-- [x] ElasticSearch support
-- [x] Bleve support
