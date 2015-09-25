@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/blevesearch/bleve"
 	"github.com/dorsha/lennon/factory"
 	"github.com/dorsha/lennon/utils"
 	"gopkg.in/olivere/elastic.v2"
@@ -24,7 +25,7 @@ var (
 	action    = flag.String("action", "", "What do you want to do? Avialble actions: "+index+","+search)
 	pathToDoc = flag.String("document", "", "Path to document that you want to index")
 	query     = flag.String("query", "", "Search query")
-	url       = flag.String("url", "", "Search engine URL (i.e. http://192.168.1.26:9200)")
+	url       = flag.String("url", "", "ElasticSearch URL (i.e. http://192.168.1.26:9200) - not relvant for Bleve")
 )
 
 func main() {
@@ -37,13 +38,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	if *url == "" {
-		fmt.Fprintf(os.Stderr, "error: %v\n", "Search engine URL must be specified.")
-		os.Exit(1)
-	}
-
 	switch *action {
 	case index:
+		if *vendor == factory.VENDOR_ELASTIC && *url == "" {
+			fmt.Fprintf(os.Stderr, "error: %v\n", "Search engine URL must be specified when using ElasticSearch.")
+			os.Exit(1)
+		}
 		doIndex()
 	case search:
 		doSearch()
@@ -83,21 +83,33 @@ func doSearch() {
 	searchResult, err := engine.Search(*query)
 	utils.ErrorCheck(err)
 
-	// Print result
-	if elasticSearchResult, ok := searchResult.(*elastic.SearchResult); ok {
+	switch value := searchResult.(type) {
+	case *elastic.SearchResult:
+		printElasticResult(value)
+	case *bleve.SearchResult:
+		printBleveResult(value)
+	}
+}
 
-		fmt.Printf("Query took %d milliseconds\n", elasticSearchResult.TookInMillis)
-		fmt.Printf("Query hits: %d\n", elasticSearchResult.TotalHits())
+func printElasticResult(elasticSearchResult *elastic.SearchResult) {
+	fmt.Printf("Query took %d milliseconds\n", elasticSearchResult.TookInMillis)
+	fmt.Printf("Query hits: %d\n", elasticSearchResult.TotalHits())
 
-		fmt.Printf("Query Result:\n")
-		if elasticSearchResult.Hits != nil {
-			for _, hit := range elasticSearchResult.Hits.Hits {
-				var p interface{}
-				json.Unmarshal(*hit.Source, &p)
-				fmt.Println(p)
-			}
+	fmt.Printf("Query Result:\n")
+	if elasticSearchResult.Hits != nil {
+		for _, hit := range elasticSearchResult.Hits.Hits {
+			var p interface{}
+			json.Unmarshal(*hit.Source, &p)
+			fmt.Println(p)
 		}
 	}
+}
+
+func printBleveResult(bleveSearchResult *bleve.SearchResult) {
+	fmt.Printf("Query took %d milliseconds\n", bleveSearchResult.Took)
+	fmt.Printf("Query hits: %d\n", bleveSearchResult.Total)
+	fmt.Printf("Query Result:\n")
+	fmt.Println(bleveSearchResult)
 }
 
 func getSearchEngine() factory.SearchEngine {

@@ -2,6 +2,7 @@ package factory
 
 import (
 	"errors"
+	"github.com/blevesearch/bleve"
 	"gopkg.in/olivere/elastic.v2"
 	"log"
 	"os"
@@ -19,20 +20,12 @@ type SearchEngine interface {
 	Search(query string) (interface{}, error)
 }
 
-type Engine struct {
+type ElasticEngine struct {
 	client *elastic.Client
 }
 
-type ElasticEngine struct {
-	Engine
-}
-
 type BleveEngine struct {
-	Engine
 }
-
-type es ElasticEngine
-type bleve BleveEngine
 
 func (es *ElasticEngine) Index(document []byte) error {
 	// create index if not exists
@@ -67,28 +60,44 @@ func (es *ElasticEngine) Search(query string) (interface{}, error) {
 }
 
 func (es *BleveEngine) Index(document []byte) error {
-	// todo - implement bleve
+	var index bleve.Index
+	index, err := bleve.Open(INDEX)
+	if index == nil {
+		mapping := bleve.NewIndexMapping()
+		index, err = bleve.New(INDEX, mapping)
+		if err != nil {
+			return err
+		}
+	}
+
+	index.Index("data", document)
 	return nil
 }
 
 func (es *BleveEngine) Search(query string) (interface{}, error) {
-	// todo - implement bleve
-	return nil, nil
-}
-
-func GetSearchEngine(url *string, vendor *string) (SearchEngine, error) {
-	// Create a client
-	client, err := createElasticClient(url)
+	index, _ := bleve.Open(INDEX)
+	bleveQuery := bleve.NewQueryStringQuery(query)
+	searchRequest := bleve.NewSearchRequest(bleveQuery)
+	searchResults, err := index.Search(searchRequest)
 	if err != nil {
 		return nil, err
 	}
+	return searchResults, nil
+}
+
+func GetSearchEngine(url *string, vendor *string) (SearchEngine, error) {
 
 	var engine SearchEngine
 	switch *vendor {
 	case VENDOR_ELASTIC:
-		engine = &ElasticEngine{Engine{client}}
+		// Create a client
+		client, err := createElasticClient(url)
+		if err != nil {
+			return nil, err
+		}
+		engine = &ElasticEngine{client}
 	case VENDOR_BLEVE:
-		engine = &BleveEngine{Engine{client}}
+		engine = &BleveEngine{}
 	default:
 		return nil, errors.New("Engine vendor must be specified.")
 

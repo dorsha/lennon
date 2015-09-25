@@ -2,7 +2,7 @@
 Go utility for ElasticSearch and Bleve
 
 ## Prerequisite
-* ElasticSearch installed and running
+* ElasticSearch installed and running - *not relevant when using Bleve*
 
 ## Install
 * go get -u -t -v github.com/dorsha/lennon
@@ -25,6 +25,12 @@ Go utility for ElasticSearch and Bleve
 **Search for a person (ElasticSearch)**  
 ```go run lennon.go -vendor elastic -action search -url http://192.168.1.26:9200 -query john ```
 
+**Index person.json file (Bleve)**  
+```go run lennon.go -vendor bleve -action index -document samples/persons.json ``` 
+
+**Search for a person (Bleve)**  
+```go run lennon.go -vendor bleve -action search -query john ```
+
 ##Status
 - [x] ElasticSearch support
-- [ ] Bleve support
+- [x] Bleve support
