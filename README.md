@@ -1,2 +1,2 @@
 # lennon
-A Go utility for ElasticSearch and Bleve
+Go utility for ElasticSearch and Bleve
