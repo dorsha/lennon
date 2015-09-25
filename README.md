@@ -23,14 +23,16 @@ Go utility for ElasticSearch and Bleve
 ```lennon -vendor <elastic/bleve> -action search -url <search_engine_url> -query <search_query> ```  
 
 ##Examples (without running go install)
-**Index person.json file (ElasticSearch)**  
+######ElasticSearch
+**Index person.json file**  
 ```go run lennon.go -vendor elastic -action index -url http://192.168.1.26:9200 -document samples/persons.json ``` 
 
-**Search for a person (ElasticSearch)**  
+**Search for a person**  
 ```go run lennon.go -vendor elastic -action search -url http://192.168.1.26:9200 -query john ```
 
-**Index person.json file (Bleve)**  
+######Bleve
+**Index person.json file**  
 ```go run lennon.go -vendor bleve -action index -document samples/persons.json ``` 
 
-**Search for a person (Bleve)**  
+**Search for a person**  
 ```go run lennon.go -vendor bleve -action search -query john ```
