@@ -1,5 +1,7 @@
 # lennon
 Go utility for ElasticSearch and Bleve
+<<<<<<< HEAD
+=======
 
 ## Prerequisite
 * ElasticSearch installed and running
@@ -24,3 +26,4 @@ Go utility for ElasticSearch and Bleve
 
 **Search for a person (ElasticSearch)**
 ```go run lennon.go -vendor elastic -action search -url http://192.168.1.26:9200 -query john ```
+>>>>>>> 5c7ca6eb00c2ac56d5f568d17b2648dcbd017384
