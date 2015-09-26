@@ -14,9 +14,10 @@ type ElasticEngine struct {
 
 /* Implements the SearchEngine interface */
 
-func (es *ElasticEngine) Index(document []byte) error {
+func (es *ElasticEngine) Index(document []byte, id string) error {
 	// create index if not exists
 	exists, err := es.client.IndexExists(INDEX).Do()
+
 	if !exists {
 		_, err := es.client.CreateIndex(INDEX).Do()
 		if err != nil {
@@ -25,7 +26,7 @@ func (es *ElasticEngine) Index(document []byte) error {
 	}
 
 	// Index the data
-	_, err = es.client.Index().Index(INDEX).Type(INDEX).Id(INDEX).BodyJson(string(document[:])).Do()
+	_, err = es.client.Index().Index(INDEX).Type(id).Id(id).BodyJson(string(document[:])).Do()
 	if err != nil {
 		return err
 	}
@@ -51,7 +52,6 @@ func (es *ElasticEngine) Delete() error {
 }
 
 func GetSearchEngine(url *string, vendor *string) (SearchEngine, error) {
-
 	var engine SearchEngine
 	switch *vendor {
 	case VENDOR_ELASTIC:

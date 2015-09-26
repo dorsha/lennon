@@ -2,6 +2,7 @@ package factory
 
 import (
 	"github.com/blevesearch/bleve"
+	"os"
 )
 
 type BleveEngine struct {
@@ -9,19 +10,15 @@ type BleveEngine struct {
 
 /* Implements the SearchEngine interface */
 
-func (be *BleveEngine) Index(document []byte) error {
+func (be *BleveEngine) Index(document []byte, id string) error {
 	var index bleve.Index
-	index, err := bleve.Open(INDEX)
-
+	mapping := bleve.NewIndexMapping()
+	index, err := bleve.New(INDEX, mapping)
 	if err != nil {
-		mapping := bleve.NewIndexMapping()
-		index, err = bleve.New(INDEX, mapping)
-		if err != nil {
-			return err
-		}
+		index, _ = bleve.Open(INDEX)
 	}
-
-	index.Index(INDEX, document)
+	index.Index(id, document)
+	index.Close()
 	return nil
 }
 
@@ -41,5 +38,8 @@ func (be *BleveEngine) Delete() error {
 	if err != nil {
 		return err
 	}
-	return index.Delete(INDEX)
+	index.NewBatch().Reset()
+	index.Close()
+	os.RemoveAll(INDEX)
+	return nil
 }

@@ -12,6 +12,7 @@ import (
 	"gopkg.in/olivere/elastic.v2"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 const (
@@ -23,10 +24,11 @@ const (
 var (
 	vendor = flag.String("vendor", "elastic", "Specify the vendor you want to test ("+factory.VENDOR_ELASTIC+"/"+
 		factory.VENDOR_BLEVE+")")
-	action    = flag.String("action", "", "What do you want to do? Avialble actions: "+index+", "+search+", "+deleteIndex)
-	pathToDoc = flag.String("document", "", "Path to document that you want to index")
-	query     = flag.String("query", "", "Search query")
-	url       = flag.String("url", "", "ElasticSearch URL (i.e. http://192.168.1.26:9200) - not relvant for Bleve")
+	action       = flag.String("action", "", "What do you want to do? Avialble actions: "+index+", "+search+", "+deleteIndex)
+	pathToDoc    = flag.String("document", "", "Path to document that you want to index")
+	pathToFolder = flag.String("folder", "", "Path to folder that contains documents to index (non-recursive")
+	query        = flag.String("query", "", "Search query")
+	url          = flag.String("url", "", "ElasticSearch URL (i.e. http://192.168.1.26:9200) - not relvant for Bleve")
 )
 
 func main() {
@@ -59,18 +61,43 @@ func main() {
 func doIndex() {
 	engine := getSearchEngine()
 
-	if *pathToDoc == "" {
-		fmt.Fprintf(os.Stderr, "error: %v\n", "Path to document must be specified")
+	if *pathToDoc == "" && *pathToFolder == "" {
+		fmt.Fprintf(os.Stderr, "error: %v\n", "Path to document/folder must be specified")
 		os.Exit(1)
 	}
 
-	doc, err := ioutil.ReadFile(*pathToDoc)
-	utils.ErrorCheck(err)
+	if *pathToDoc != "" && *pathToFolder != "" {
+		fmt.Fprintf(os.Stderr, "error: %v\n", "Folder or Document? Can't specify both.")
+		os.Exit(1)
+	}
 
-	start := time.Now().UnixNano() / int64(time.Millisecond)
-	err = engine.Index(doc)
+	if *pathToDoc != "" {
+		timeTook := indexDocument(engine, *pathToDoc)
+		fmt.Printf("Took %d milliseconds to index.\n", timeTook)
+	} else {
+		files, err := ioutil.ReadDir(*pathToFolder)
+		utils.ErrorCheck(err)
+		var docCount int = 0
+		var timeTook int64 = 0
+		for _, file := range files {
+			if file.IsDir() {
+				continue // expected flat structure
+			}
+			docCount++
+			timeTook += indexDocument(engine, *pathToFolder+"/"+file.Name())
+		}
+		fmt.Printf("Took %d milliseconds to index %d documents.\n", timeTook, docCount)
+	}
+}
+
+func indexDocument(engine factory.SearchEngine, pathToDoc string) (timeTook int64) {
+	doc, err := ioutil.ReadFile(pathToDoc)
 	utils.ErrorCheck(err)
-	fmt.Printf("Took %d milliseconds to index.\n", time.Now().UnixNano()/int64(time.Millisecond)-start)
+	fmt.Printf("Indexing document: %s\n", pathToDoc)
+	start := time.Now().UnixNano() / int64(time.Millisecond)
+	err = engine.Index(doc, strings.Replace(pathToDoc, "/", ".", 1))
+	utils.ErrorCheck(err)
+	return time.Now().UnixNano()/int64(time.Millisecond) - start
 }
 
 func doDelete() {

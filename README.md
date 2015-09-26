@@ -4,6 +4,10 @@ Go utility for ElasticSearch and Bleve
 ##Status
 - [x] ElasticSearch support
 - [x] Bleve support
+- [x] Index a document file
+- [x] Index a folder with documents
+- [x] Delete index
+- [x] Search
 
 ## Prerequisite
 * ElasticSearch installed and running - *not relevant when using Bleve*
@@ -17,13 +21,16 @@ Go utility for ElasticSearch and Bleve
 ```lennon --help ```  
 
 **Index a given document**  
-```lennon -vendor <elastic/bleve> -action index -url <es_engine_url> -document <path_to_document> ```
+```lennon -vendor <elastic/bleve> -action index [-url <es_engine_url>] -document <path_to_document> ```
+
+**Index documents inside folder**  
+```lennon -vendor <elastic/bleve> -action index [-url <es_engine_url>] -folder <path_to_folder> ```
 
 **Search in the indexed document**  
-```lennon -vendor <elastic/bleve> -action search -url <es_engine_url> -query <search_query> ```  
+```lennon -vendor <elastic/bleve> -action search [-url <es_engine_url>] -query <search_query> ```  
 
 **Delete index**  
-```lennon -vendor <elastic/bleve> -action deleteIndex -url <es_engine_url> ```  
+```lennon -vendor <elastic/bleve> -action deleteIndex [-url <es_engine_url>] ```  
 
 ##Examples (without running go install)
 ######ElasticSearch
