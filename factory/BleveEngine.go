@@ -3,6 +3,7 @@ package factory
 import (
 	"github.com/blevesearch/bleve"
 	"os"
+	"time"
 )
 
 type BleveEngine struct {
@@ -10,7 +11,8 @@ type BleveEngine struct {
 
 /* Implements the SearchEngine interface */
 
-func (be *BleveEngine) BatchIndex(documents *[]*Document) error {
+func (be *BleveEngine) BatchIndex(documents *[]*Document) (int64, error) {
+	start := time.Now().UnixNano() / int64(time.Millisecond)
 	var index bleve.Index
 	mapping := bleve.NewIndexMapping()
 	index, err := bleve.New(INDEX, mapping)
@@ -26,10 +28,13 @@ func (be *BleveEngine) BatchIndex(documents *[]*Document) error {
 
 	index.Batch(batch)
 	index.Close()
-	return nil
+
+	return time.Now().UnixNano()/int64(time.Millisecond) - start, nil
 }
 
-func (be *BleveEngine) Index(document *Document) error {
+func (be *BleveEngine) Index(document *Document) (int64, error) {
+	start := time.Now().UnixNano() / int64(time.Millisecond)
+
 	var index bleve.Index
 	mapping := bleve.NewIndexMapping()
 	index, err := bleve.New(INDEX, mapping)
@@ -40,7 +45,8 @@ func (be *BleveEngine) Index(document *Document) error {
 	data := (*document).Data
 	index.Index(id, data)
 	index.Close()
-	return nil
+
+	return time.Now().UnixNano()/int64(time.Millisecond) - start, nil
 }
 
 func (be *BleveEngine) Search(query string) (interface{}, error) {

@@ -8,7 +8,7 @@ Go utility for ElasticSearch and Bleve
 - [x] Index a folder with documents
 - [x] Delete indexes
 - [x] Search
-- [ ] Batch support
+- [x] Batch support
 
 ## Prerequisite
 * ElasticSearch installed and running - *not relevant when using Bleve*

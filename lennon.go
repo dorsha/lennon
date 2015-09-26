@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"time"
 
 	"github.com/blevesearch/bleve"
 	"github.com/dorsha/lennon/factory"
@@ -100,9 +99,9 @@ func indexDocuments(engine factory.SearchEngine) (int64, int) {
 		docCount++
 	}
 	// index in batch
-	start := time.Now().UnixNano() / int64(time.Millisecond)
-	engine.BatchIndex(&documents)
-	return time.Now().UnixNano()/int64(time.Millisecond) - start, docCount
+	timeTook, err := engine.BatchIndex(&documents)
+	utils.ErrorCheck(err)
+	return timeTook, docCount
 }
 
 func indexDocument(engine factory.SearchEngine) (timeTook int64) {
@@ -110,10 +109,9 @@ func indexDocument(engine factory.SearchEngine) (timeTook int64) {
 	utils.ErrorCheck(err)
 	fmt.Printf("Indexing document: %s\n", *pathToDoc)
 	doc := factory.Document{utils.FixIdSyntax(*pathToDoc), data}
-	start := time.Now().UnixNano() / int64(time.Millisecond)
-	err = engine.Index(&doc)
+	timeTook, err = engine.Index(&doc)
 	utils.ErrorCheck(err)
-	return time.Now().UnixNano()/int64(time.Millisecond) - start
+	return timeTook
 }
 
 func doDelete() {

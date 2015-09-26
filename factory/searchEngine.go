@@ -12,8 +12,8 @@ type Document struct {
 }
 
 type SearchEngine interface {
-	BatchIndex(documents *[]*Document) error
-	Index(document *Document) error
+	BatchIndex(documents *[]*Document) (int64, error)
+	Index(document *Document) (int64, error)
 	Search(query string) (interface{}, error)
 	Delete() error
 }

@@ -2,6 +2,7 @@ package factory
 
 import (
 	"errors"
+	"github.com/dorsha/lennon/utils"
 	"gopkg.in/olivere/elastic.v2"
 	"log"
 	"os"
@@ -14,29 +15,35 @@ type ElasticEngine struct {
 
 /* Implements the SearchEngine interface */
 
-func (es *ElasticEngine) BatchIndex(documents *[]*Document) error {
-	return nil // todo implement
-}
+func (es *ElasticEngine) BatchIndex(documents *[]*Document) (int64, error) {
+	err := es.createIndexIfNotExists()
+	utils.ErrorCheck(err)
 
-func (es *ElasticEngine) Index(document *Document) error {
-	// create index if not exists
-	exists, err := es.client.IndexExists(INDEX).Do()
+	bulkRequest := es.client.Bulk()
 
-	if !exists {
-		_, err := es.client.CreateIndex(INDEX).Do()
-		if err != nil {
-			return err
-		}
+	for _, document := range *documents {
+		bulkRequest.Add(elastic.NewBulkIndexRequest().Index(INDEX).Type((*document).Id).Id((*document).Id).
+			Doc(string((*document).Data[:])))
 	}
 
+	bulkResponse, err := bulkRequest.Do()
+
+	return int64(bulkResponse.Took), err
+}
+
+func (es *ElasticEngine) Index(document *Document) (int64, error) {
+	start := time.Now().UnixNano() / int64(time.Millisecond)
+
+	err := es.createIndexIfNotExists()
+	utils.ErrorCheck(err)
 	// Index the data
 	_, err = es.client.Index().Index(INDEX).Type((*document).Id).Id((*document).Id).
 		BodyJson(string((*document).Data[:])).Do()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return int64(time.Now().UnixNano()/int64(time.Millisecond) - start), nil
 }
 
 func (es *ElasticEngine) Search(query string) (interface{}, error) {
@@ -84,4 +91,17 @@ func createElasticClient(url *string) (*elastic.Client, error) {
 		elastic.SetMaxRetries(5),
 		elastic.SetErrorLog(log.New(os.Stderr, "ELASTIC ", log.LstdFlags)),
 		elastic.SetInfoLog(log.New(os.Stdout, "", log.LstdFlags)))
+}
+
+func (es *ElasticEngine) createIndexIfNotExists() error {
+	exists, _ := es.client.IndexExists(INDEX).Do()
+
+	if !exists {
+		_, err := es.client.CreateIndex(INDEX).Do()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
