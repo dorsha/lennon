@@ -14,7 +14,11 @@ type ElasticEngine struct {
 
 /* Implements the SearchEngine interface */
 
-func (es *ElasticEngine) Index(document []byte, id string) error {
+func (es *ElasticEngine) BatchIndex(documents *[]*Document) error {
+	return nil // todo implement
+}
+
+func (es *ElasticEngine) Index(document *Document) error {
 	// create index if not exists
 	exists, err := es.client.IndexExists(INDEX).Do()
 
@@ -26,7 +30,8 @@ func (es *ElasticEngine) Index(document []byte, id string) error {
 	}
 
 	// Index the data
-	_, err = es.client.Index().Index(INDEX).Type(id).Id(id).BodyJson(string(document[:])).Do()
+	_, err = es.client.Index().Index(INDEX).Type((*document).Id).Id((*document).Id).
+		BodyJson(string((*document).Data[:])).Do()
 	if err != nil {
 		return err
 	}

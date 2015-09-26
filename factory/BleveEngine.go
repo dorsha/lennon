@@ -10,14 +10,35 @@ type BleveEngine struct {
 
 /* Implements the SearchEngine interface */
 
-func (be *BleveEngine) Index(document []byte, id string) error {
+func (be *BleveEngine) BatchIndex(documents *[]*Document) error {
 	var index bleve.Index
 	mapping := bleve.NewIndexMapping()
 	index, err := bleve.New(INDEX, mapping)
 	if err != nil {
 		index, _ = bleve.Open(INDEX)
 	}
-	index.Index(id, document)
+
+	batch := index.NewBatch()
+
+	for _, document := range *documents {
+		batch.Index((*document).Id, (*document).Data)
+	}
+
+	index.Batch(batch)
+	index.Close()
+	return nil
+}
+
+func (be *BleveEngine) Index(document *Document) error {
+	var index bleve.Index
+	mapping := bleve.NewIndexMapping()
+	index, err := bleve.New(INDEX, mapping)
+	if err != nil {
+		index, _ = bleve.Open(INDEX)
+	}
+	id := (*document).Id
+	data := (*document).Data
+	index.Index(id, data)
 	index.Close()
 	return nil
 }
@@ -38,7 +59,6 @@ func (be *BleveEngine) Delete() error {
 	if err != nil {
 		return err
 	}
-	index.NewBatch().Reset()
 	index.Close()
 	os.RemoveAll(INDEX)
 	return nil

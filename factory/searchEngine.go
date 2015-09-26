@@ -6,8 +6,14 @@ const (
 	VENDOR_BLEVE   = "bleve"
 )
 
+type Document struct {
+	Id   string
+	Data []byte
+}
+
 type SearchEngine interface {
-	Index(document []byte, id string) error
+	BatchIndex(documents *[]*Document) error
+	Index(document *Document) error
 	Search(query string) (interface{}, error)
 	Delete() error
 }

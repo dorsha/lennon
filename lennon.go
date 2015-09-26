@@ -12,7 +12,6 @@ import (
 	"gopkg.in/olivere/elastic.v2"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
 const (
@@ -72,30 +71,47 @@ func doIndex() {
 	}
 
 	if *pathToDoc != "" {
-		timeTook := indexDocument(engine, *pathToDoc)
+		timeTook := indexDocument(engine)
 		fmt.Printf("Took %d milliseconds to index.\n", timeTook)
 	} else {
-		files, err := ioutil.ReadDir(*pathToFolder)
-		utils.ErrorCheck(err)
-		var docCount int = 0
-		var timeTook int64 = 0
-		for _, file := range files {
-			if file.IsDir() {
-				continue // expected flat structure
-			}
-			docCount++
-			timeTook += indexDocument(engine, *pathToFolder+"/"+file.Name())
-		}
+		timeTook, docCount := indexDocuments(engine)
 		fmt.Printf("Took %d milliseconds to index %d documents.\n", timeTook, docCount)
 	}
 }
 
-func indexDocument(engine factory.SearchEngine, pathToDoc string) (timeTook int64) {
-	doc, err := ioutil.ReadFile(pathToDoc)
+func readFile(pathToDoc string) ([]byte, error) {
+	return ioutil.ReadFile(pathToDoc)
+}
+
+func indexDocuments(engine factory.SearchEngine) (int64, int) {
+	// prepare documents for batch index
+	files, err := ioutil.ReadDir(*pathToFolder)
 	utils.ErrorCheck(err)
-	fmt.Printf("Indexing document: %s\n", pathToDoc)
+	var docCount int = 0
+	var documents = make([]*factory.Document, len(files))
+	for _, file := range files {
+		if file.IsDir() {
+			continue // expected flat structure
+		}
+		path := *pathToFolder + "/" + file.Name()
+		data, err := readFile(path)
+		utils.ErrorCheck(err)
+		documents[docCount] = &factory.Document{utils.FixIdSyntax(path), data}
+		docCount++
+	}
+	// index in batch
 	start := time.Now().UnixNano() / int64(time.Millisecond)
-	err = engine.Index(doc, strings.Replace(pathToDoc, "/", ".", 1))
+	engine.BatchIndex(&documents)
+	return time.Now().UnixNano()/int64(time.Millisecond) - start, docCount
+}
+
+func indexDocument(engine factory.SearchEngine) (timeTook int64) {
+	data, err := readFile(*pathToDoc)
+	utils.ErrorCheck(err)
+	fmt.Printf("Indexing document: %s\n", *pathToDoc)
+	doc := factory.Document{utils.FixIdSyntax(*pathToDoc), data}
+	start := time.Now().UnixNano() / int64(time.Millisecond)
+	err = engine.Index(&doc)
 	utils.ErrorCheck(err)
 	return time.Now().UnixNano()/int64(time.Millisecond) - start
 }
