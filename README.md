@@ -6,7 +6,7 @@ Go utility for ElasticSearch and Bleve
 - [x] Bleve support
 - [x] Index a document file
 - [x] Index a folder with documents
-- [x] Delete index
+- [x] Delete indexes
 - [x] Search
 
 ## Prerequisite
