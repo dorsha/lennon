@@ -158,7 +158,7 @@ func printElasticResult(elasticSearchResult *elastic.SearchResult) {
 }
 
 func printBleveResult(bleveSearchResult *bleve.SearchResult) {
-	fmt.Printf("Query took %d milliseconds\n", bleveSearchResult.Took)
+	fmt.Printf("Query took %d nanoseconds\n", bleveSearchResult.Took)
 	fmt.Printf("Query hits: %d\n", bleveSearchResult.Total)
 	fmt.Printf("Query Result:\n")
 	fmt.Println(bleveSearchResult)
