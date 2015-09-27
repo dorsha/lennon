@@ -58,6 +58,7 @@ func (be *BleveEngine) Search(query string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return searchResults, nil
 }
 
