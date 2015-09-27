@@ -1,9 +1,10 @@
 package factory
 
 import (
-	"github.com/blevesearch/bleve"
 	"os"
 	"time"
+
+	"github.com/blevesearch/bleve"
 )
 
 type BleveEngine struct {

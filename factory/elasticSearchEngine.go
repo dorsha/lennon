@@ -2,11 +2,12 @@ package factory
 
 import (
 	"errors"
-	"github.com/dorsha/lennon/utils"
-	"gopkg.in/olivere/elastic.v2"
 	"log"
 	"os"
 	"time"
+
+	"github.com/dorsha/lennon/utils"
+	"gopkg.in/olivere/elastic.v2"
 )
 
 type ElasticEngine struct {

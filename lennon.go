@@ -5,12 +5,13 @@ import (
 	"flag"
 	"fmt"
 
+	"io/ioutil"
+	"os"
+
 	"github.com/blevesearch/bleve"
 	"github.com/dorsha/lennon/factory"
 	"github.com/dorsha/lennon/utils"
 	"gopkg.in/olivere/elastic.v2"
-	"io/ioutil"
-	"os"
 )
 
 const (
