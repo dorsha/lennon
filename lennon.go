@@ -27,11 +27,11 @@ var (
 		factory.VENDOR_BLEVE+")")
 	action       = flag.String("action", "", "What do you want to do? Avialble actions: "+index+", "+search+", "+deleteIndex)
 	pathToDoc    = flag.String("document", "", "Path to document that you want to index")
-	pathToFolder = flag.String("folder", "", "Path to folder that contains documents to index (non-recursive")
+	pathToFolder = flag.String("folder", "", "Path to folder that contains documents to index (non-recursive)")
 	query        = flag.String("query", "", "Search query")
 	url          = flag.String("url", "", "ElasticSearch URL (i.e. http://192.168.1.26:9200) - not relvant for Bleve")
 	KVStore      = flag.String("store", goleveldb.Name, "KV Store for Bleve. Avialble stores: "+goleveldb.Name+
-		", "+boltdb.Name+" (default is '"+goleveldb.Name+"')")
+		", "+boltdb.Name)
 )
 
 func main() {
