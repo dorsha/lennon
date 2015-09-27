@@ -100,7 +100,7 @@ func indexDocuments(engine factory.SearchEngine) (int64, int) {
 		docCount++
 	}
 	// index in batch
-	timeTook, err := engine.BatchIndex(&documents)
+	timeTook, err := engine.BatchIndex(documents)
 	utils.ErrorCheck(err)
 	return timeTook, docCount
 }

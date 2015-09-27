@@ -16,14 +16,14 @@ type ElasticEngine struct {
 
 /* Implements the SearchEngine interface */
 
-func (es *ElasticEngine) BatchIndex(documents *[]*Document) (int64, error) {
+func (es *ElasticEngine) BatchIndex(documents []*Document) (int64, error) {
 	err := es.createIndexIfNotExists()
 	utils.ErrorCheck(err)
 
 	bulkRequest := es.client.Bulk()
 
-	for _, document := range *documents {
-		bulkRequest.Add(elastic.NewBulkIndexRequest().Index(INDEX).Type((*document).Id).Id((*document).Id).
+	for _, document := range documents {
+		bulkRequest.Add(elastic.NewBulkIndexRequest().Index(INDEX).Type(document.Id).Id(document.Id).
 			Doc(string((*document).Data[:])))
 	}
 

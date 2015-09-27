@@ -12,7 +12,7 @@ type BleveEngine struct {
 
 /* Implements the SearchEngine interface */
 
-func (be *BleveEngine) BatchIndex(documents *[]*Document) (int64, error) {
+func (be *BleveEngine) BatchIndex(documents []*Document) (int64, error) {
 	start := time.Now().UnixNano() / int64(time.Millisecond)
 	var index bleve.Index
 	mapping := bleve.NewIndexMapping()
@@ -23,8 +23,8 @@ func (be *BleveEngine) BatchIndex(documents *[]*Document) (int64, error) {
 
 	batch := index.NewBatch()
 
-	for _, document := range *documents {
-		batch.Index((*document).Id, (*document).Data)
+	for _, document := range documents {
+		batch.Index(document.Id, document.Data)
 	}
 
 	index.Batch(batch)
