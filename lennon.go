@@ -83,8 +83,14 @@ func doIndex() {
 	}
 }
 
-func readFile(pathToDoc string) ([]byte, error) {
-	return ioutil.ReadFile(pathToDoc)
+func indexDocument(engine factory.SearchEngine) (timeTook int64) {
+	data, err := utils.ReadFile(*pathToDoc)
+	utils.ErrorCheck(err)
+	fmt.Printf("Indexing document: %s\n", *pathToDoc)
+	doc := factory.Document{utils.FixIdSyntax(*pathToDoc), data}
+	timeTook, err = engine.Index(&doc)
+	utils.ErrorCheck(err)
+	return timeTook
 }
 
 func indexDocuments(engine factory.SearchEngine) (int64, int) {
@@ -98,7 +104,7 @@ func indexDocuments(engine factory.SearchEngine) (int64, int) {
 			continue // expected flat structure
 		}
 		path := *pathToFolder + "/" + file.Name()
-		data, err := readFile(path)
+		data, err := utils.ReadFile(path)
 		utils.ErrorCheck(err)
 		documents[docCount] = &factory.Document{utils.FixIdSyntax(path), data}
 		docCount++
@@ -107,16 +113,6 @@ func indexDocuments(engine factory.SearchEngine) (int64, int) {
 	timeTook, err := engine.BatchIndex(documents)
 	utils.ErrorCheck(err)
 	return timeTook, docCount
-}
-
-func indexDocument(engine factory.SearchEngine) (timeTook int64) {
-	data, err := readFile(*pathToDoc)
-	utils.ErrorCheck(err)
-	fmt.Printf("Indexing document: %s\n", *pathToDoc)
-	doc := factory.Document{utils.FixIdSyntax(*pathToDoc), data}
-	timeTook, err = engine.Index(&doc)
-	utils.ErrorCheck(err)
-	return timeTook
 }
 
 func doDelete() {

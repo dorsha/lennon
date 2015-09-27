@@ -1,6 +1,9 @@
 package utils
 
-import "strings"
+import (
+	"io/ioutil"
+	"strings"
+)
 
 func ErrorCheck(err error) {
 	if err != nil {
@@ -10,4 +13,8 @@ func ErrorCheck(err error) {
 
 func FixIdSyntax(id string) string {
 	return strings.Replace(id, "/", ".", 1)
+}
+
+func ReadFile(pathToDoc string) ([]byte, error) {
+	return ioutil.ReadFile(pathToDoc)
 }
