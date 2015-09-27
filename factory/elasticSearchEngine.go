@@ -1,7 +1,6 @@
 package factory
 
 import (
-	"errors"
 	"log"
 	"os"
 	"time"
@@ -11,7 +10,7 @@ import (
 )
 
 type ElasticEngine struct {
-	client *elastic.Client
+	Client *elastic.Client
 }
 
 /* Implements the SearchEngine interface */
@@ -20,7 +19,7 @@ func (es *ElasticEngine) BatchIndex(documents []*Document) (int64, error) {
 	err := es.createIndexIfNotExists()
 	utils.ErrorCheck(err)
 
-	bulkRequest := es.client.Bulk()
+	bulkRequest := es.Client.Bulk()
 
 	for _, document := range documents {
 		bulkRequest.Add(elastic.NewBulkIndexRequest().Index(INDEX).Type(document.Id).Id(document.Id).
@@ -38,7 +37,7 @@ func (es *ElasticEngine) Index(document *Document) (int64, error) {
 	err := es.createIndexIfNotExists()
 	utils.ErrorCheck(err)
 	// Index the data
-	_, err = es.client.Index().Index(INDEX).Type((*document).Id).Id((*document).Id).
+	_, err = es.Client.Index().Index(INDEX).Type((*document).Id).Id((*document).Id).
 		BodyJson(string((*document).Data[:])).Do()
 	if err != nil {
 		return 0, err
@@ -49,7 +48,7 @@ func (es *ElasticEngine) Index(document *Document) (int64, error) {
 
 func (es *ElasticEngine) Search(query string) (interface{}, error) {
 	termQuery := elastic.NewQueryStringQuery(query)
-	searchResult, err := es.client.Search().
+	searchResult, err := es.Client.Search().
 		Index(INDEX).
 		Query(&termQuery).
 		From(0).Size(10).
@@ -60,31 +59,11 @@ func (es *ElasticEngine) Search(query string) (interface{}, error) {
 }
 
 func (es *ElasticEngine) Delete() error {
-	_, err := es.client.DeleteIndex(INDEX).Do()
+	_, err := es.Client.DeleteIndex(INDEX).Do()
 	return err
 }
 
-func GetSearchEngine(url *string, vendor *string) (SearchEngine, error) {
-	var engine SearchEngine
-	switch *vendor {
-	case VENDOR_ELASTIC:
-		// Create a client
-		client, err := createElasticClient(url)
-		if err != nil {
-			return nil, err
-		}
-		engine = &ElasticEngine{client}
-	case VENDOR_BLEVE:
-		engine = &BleveEngine{}
-	default:
-		return nil, errors.New("Engine vendor must be specified.")
-
-	}
-
-	return engine, nil
-}
-
-func createElasticClient(url *string) (*elastic.Client, error) {
+func CreateElasticClient(url *string) (*elastic.Client, error) {
 	return elastic.NewClient(
 		elastic.SetURL(*url),
 		elastic.SetSniff(false),
@@ -95,10 +74,10 @@ func createElasticClient(url *string) (*elastic.Client, error) {
 }
 
 func (es *ElasticEngine) createIndexIfNotExists() error {
-	exists, _ := es.client.IndexExists(INDEX).Do()
+	exists, _ := es.Client.IndexExists(INDEX).Do()
 
 	if !exists {
-		_, err := es.client.CreateIndex(INDEX).Do()
+		_, err := es.Client.CreateIndex(INDEX).Do()
 		if err != nil {
 			return err
 		}

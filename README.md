@@ -9,6 +9,7 @@ Go utility for ElasticSearch and Bleve
 - [x] Delete indexes
 - [x] Search
 - [x] Batch support
+- [x] KV Store support for Bleve (LevelDB and BoltDB)
 
 ## Prerequisite
 * ElasticSearch installed and running - *not relevant when using Bleve*
@@ -22,16 +23,16 @@ Go utility for ElasticSearch and Bleve
 ```lennon --help ```  
 
 **Index a given document**  
-```lennon -vendor <elastic/bleve> -action index [-url <es_engine_url>] -document <path_to_document> ```
+```lennon -vendor <elastic/bleve> -action index -document <path_to_document> [-url <es_engine_url>] [-store <boltdb/goleveldb>]```
 
 **Index documents inside folder**  
-```lennon -vendor <elastic/bleve> -action index [-url <es_engine_url>] -folder <path_to_folder> ```
+```lennon -vendor <elastic/bleve> -action index -folder <path_to_folder> [-url <es_engine_url>] [-store <boltdb/goleveldb>] ```
 
 **Search in the indexed document**  
-```lennon -vendor <elastic/bleve> -action search [-url <es_engine_url>] -query <search_query> ```  
+```lennon -vendor <elastic/bleve> -action search -query <search_query> [-url <es_engine_url>] [-store <boltdb/goleveldb>] ```  
 
 **Delete index**  
-```lennon -vendor <elastic/bleve> -action deleteIndex [-url <es_engine_url>] ```  
+```lennon -vendor <elastic/bleve> -action deleteIndex [-url <es_engine_url>] [-store <boltdb/goleveldb>] ```  
 
 ##Examples (without running go install)
 ######ElasticSearch
@@ -45,11 +46,14 @@ Go utility for ElasticSearch and Bleve
 ```go run lennon.go -vendor elastic -action deleteIndex -url http://192.168.1.18:9200 ```
 
 ######Bleve
-**Index person.json file**  
+**Index person.json file (LevelDB)**  
 ```go run lennon.go -vendor bleve -action index -document samples/persons.json ``` 
 
-**Search for a person**  
+**Index person.json file (BoltDB)**  
+```go run lennon.go -vendor bleve -action index -document samples/persons.json -store boltdb ``` 
+
+**Search for a person (LevelDB)**  
 ```go run lennon.go -vendor bleve -action search -query john ```
 
-**Delete the index**  
+**Delete the index (LevelDB)**  
 ```go run lennon.go -vendor bleve -action deleteIndex ```

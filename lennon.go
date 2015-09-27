@@ -9,6 +9,8 @@ import (
 	"os"
 
 	"github.com/blevesearch/bleve"
+	"github.com/blevesearch/bleve/index/store/boltdb"
+	"github.com/blevesearch/bleve/index/store/goleveldb"
 	"github.com/dorsha/lennon/factory"
 	"github.com/dorsha/lennon/utils"
 	"gopkg.in/olivere/elastic.v2"
@@ -28,6 +30,8 @@ var (
 	pathToFolder = flag.String("folder", "", "Path to folder that contains documents to index (non-recursive")
 	query        = flag.String("query", "", "Search query")
 	url          = flag.String("url", "", "ElasticSearch URL (i.e. http://192.168.1.26:9200) - not relvant for Bleve")
+	KVStore      = flag.String("store", goleveldb.Name, "KV Store for Bleve. Avialble stores: "+goleveldb.Name+
+		", "+boltdb.Name+" (default is '"+goleveldb.Name+"')")
 )
 
 func main() {
@@ -165,7 +169,7 @@ func printBleveResult(bleveSearchResult *bleve.SearchResult) {
 }
 
 func getSearchEngine() factory.SearchEngine {
-	engine, err := factory.GetSearchEngine(url, vendor)
+	engine, err := factory.GetSearchEngine(url, vendor, *KVStore)
 	utils.ErrorCheck(err)
 	return engine
 }
