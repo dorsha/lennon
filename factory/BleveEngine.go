@@ -1,10 +1,13 @@
 package factory
 
 import (
+	"fmt"
 	"os"
 	"time"
 
 	"github.com/blevesearch/bleve"
+	"github.com/blevesearch/bleve/index/store/boltdb"
+	"github.com/blevesearch/bleve/index/store/goleveldb"
 )
 
 type BleveEngine struct {
@@ -69,5 +72,15 @@ func (be *BleveEngine) Delete() error {
 	}
 	index.Close()
 	os.RemoveAll(INDEX)
+	return nil
+}
+
+func (be *BleveEngine) SetKVStore(storeName string) error {
+	if storeName != goleveldb.Name && storeName != boltdb.Name {
+		panic("Unsupprted KV store.")
+	}
+
+	bleve.Config.DefaultKVStore = storeName
+	fmt.Printf("KV Store: %s\n", storeName)
 	return nil
 }
