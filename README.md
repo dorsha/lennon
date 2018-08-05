@@ -1,7 +1,7 @@
 # lennon
 Go utility for ElasticSearch and Bleve
 
-##Status
+## Status
 - [x] ElasticSearch support
 - [x] Bleve support
 - [x] Index a document file
@@ -34,8 +34,8 @@ Go utility for ElasticSearch and Bleve
 **Delete index**  
 <sub>```lennon -vendor <elastic/bleve> -action deleteIndex [-url <es_engine_url>] [-store <boltdb/goleveldb>] ```</sub>  
 
-##Examples (without running go install)
-######ElasticSearch
+## Examples (without running go install)
+### ElasticSearch
 **Index person.json file**  
 <sub>```go run lennon.go -vendor elastic -action index -url http://192.168.1.26:9200 -document samples/persons.json ```</sub> 
 
@@ -45,7 +45,7 @@ Go utility for ElasticSearch and Bleve
 **Delete the index**  
 <sub>```go run lennon.go -vendor elastic -action deleteIndex -url http://192.168.1.18:9200 ```</sub>
 
-######Bleve
+### Bleve
 **Index person.json file (LevelDB)**  
 <sub>```go run lennon.go -vendor bleve -action index -document samples/persons.json ```</sub>
 
